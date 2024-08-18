@@ -1,0 +1,23 @@
+::ng-deep .mat-form-field {
+    .mat-input-element {
+        color: slategray;
+    }
+    .mat-form-field-label {
+        color: slategray;
+    }
+    .mat-form-field-underline {
+        background-color: slategray;
+    }
+    .mat-form-field-ripple {
+        background-color: slategray;
+    }
+    .mat-form-field-required-marker {
+        color: slategray;
+    }
+    .mat-select-value-text {
+        white-space: slategray;
+    }
+    .mat-select-value-text {
+        color: #c2185b !important;
+      }
+}

@@ -1,69 +1,71 @@
-<form>
-  <mat-form-field>
-    <mat-label>Select Meeting Type</mat-label>
-    <mat-select matNativeControl required>
-      <mat-option
-      *ngFor="let type of meetingTypes" [value]="type.id" (onSelectionChange)="getSeletedValue($event)">{{ type.name }}
-    </mat-option>
-    </mat-select>
-  </mat-form-field>
-  
-  <h2>{{ meetingType }} {{ meeting }} {{ meetingDate }}</h2>
+<mat-form-field>
+  <mat-label>Select Meeting Type</mat-label>
+  <mat-select matNativeControl required>
+    <mat-option
+    *ngFor="let type of meetingTypes" [value]="type.id" (onSelectionChange)="getSeletedValue($event)">{{ type.name }}
+  </mat-option>
+  </mat-select>
+</mat-form-field>
 
-  
-  <div class="table table-striped">
-    <table class="table table-striped table-sm">
-      <thead>
-        <tr>
-          <th scope="col">
-            <section class="example-section">
-              <input type="checkbox" class="form-check-input" type="checkbox" style="margin-right: 30px; margin-left: 30px;"
-              (change)="$event ? toggleAllRows() : null"
-                   [checked]="selection.hasValue() && isAllSelected()"
-                   [indeterminate]="selection.hasValue() && !isAllSelected()">
-           </section>
+<h2>{{ meetingResponse.meetingType.name }} {{ this.meetingResponse.name }} {{ meetingResponse.createdOn.substring(0, 10) }}</h2>
 
-          </th>
-          <th scope="col">Meeting Item</th>
-          <th scope="col">Comment</th>
-          <th scope="col">Status</th>
-          <th scope="col">Action By</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let meetingItem of meetingItems">
-          <td>
-            <section class="example-section">
-              <input type="checkbox" class="form-check-input" type="checkbox" style="margin-right: 30px; margin-left: 30px;"
-              (change)="$event ? selection.toggle(meetingItem) : null"
-                    [checked]="selection.isSelected(meetingItem)">
-           </section>
-            
-         </td>
-          <td>{{meetingItem.description}}</td>
-          <td>
-            <ul>
-              <li *ngFor="let actionItem of meetingItem.actionItems">{{ actionItem.description }}</li>
-          </ul>
+
+<div class="table table-striped">
+  <table class="table table-striped table-sm">
+    <thead>
+      <tr>
+        <th scope="col">
+          <section class="example-section">
+            <input type="checkbox" class="form-check-input" type="checkbox" style="margin-right: 30px; margin-left: 30px;"
+            (change)="$event ? toggleAllRows() : null"
+                 [checked]="selection.hasValue() && isAllSelected()"
+                 [indeterminate]="selection.hasValue() && !isAllSelected()">
+         </section>
+
+        </th>
+        <th scope="col">Meeting Item</th>
+        <th scope="col">Comment</th>
+        <th scope="col">Status</th>
+        <th scope="col">Action By</th>
+        <th *ngIf="newMeetingCreated == true" scope="col">Update</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let meetingItem of meetingResponse.meetingItems">
+        <td>
+          <section class="example-section">
+            <input type="checkbox" class="form-check-input" type="checkbox" style="margin-right: 30px; margin-left: 30px;"
+            (change)="$event ? selection.toggle(meetingItem) : null"
+                  [checked]="selection.isSelected(meetingItem)">
+         </section>
+          
+       </td>
+        <td>{{meetingItem.description}}</td>
+        <td>
+          <ul>
+            <li *ngFor="let actionItem of meetingItem.actionItems">{{ actionItem.description }}</li>
+        </ul>
+      </td>
+        <td>{{meetingItem.status.name}}</td>
+        <td></td>
+        <td *ngIf="newMeetingCreated == true">
+          <select (change)="onStatusSelected($event)" class="form-select" aria-label="filter by user type">
+            <option *ngFor="let status of statuses" value="{{ status.id }}">{{ status.name }}</option>
+          </select>
         </td>
-          <td>{{meetingItem.status.name}}</td>
-          <td></td>
-        </tr>
-      </tbody>
-    </table>
-    <!-- <div class="d-flex justify-content-center">
-        <app-pager [totalCount]="totalCount" [pageSize]="userParams.PageSize" (pageChanged)="onPageChanged($event)"></app-pager>
-    </div> -->
-  </div>
+      </tr>
+    </tbody>
+  </table>
+  <!-- <div class="d-flex justify-content-center">
+      <app-pager [totalCount]="totalCount" [pageSize]="userParams.PageSize" (pageChanged)="onPageChanged($event)"></app-pager>
+  </div> -->
+</div>
 
-    <div class="mat-form-field inline" style="margin-left: 20px">
-      <div class="mat-form-field-wrapper">
-        <button mat-raised-button color="primary" (click)="captureNewMeeting()">
-          <mat-icon>add</mat-icon> Capture new meeting
-        </button>
-      </div>
+  <div class="mat-form-field inline" style="margin-left: 20px">
+    <div class="mat-form-field-wrapper">
+      <button *ngIf="meetingResponse.meetingItems.length > 0" mat-raised-button color="primary" (click)="captureNewMeeting()">
+        <mat-icon>add</mat-icon> Capture new meeting
+      </button>
     </div>
-
-</form>
+  </div>
 

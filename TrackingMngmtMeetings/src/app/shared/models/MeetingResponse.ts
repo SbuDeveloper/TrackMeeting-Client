@@ -1,7 +1,11 @@
 import { MeetingItem } from "./MeetingItem"
+import { MeetingType } from "./MeetingType"
 
 export interface MeetingResponse {
-    name: string
-    meetingType: string
-    meetingItems: MeetingItem[]
+  id: number
+  name: string
+  meetingTypeId: number
+  meetingType: MeetingType
+  meetingItems: MeetingItem[],
+  createdOn: string
   }

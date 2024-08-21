@@ -6,6 +6,8 @@ import { SelectionModel } from '@angular/cdk/collections';
 import { CreateMeetingRequest } from 'src/app/shared/models/CreateMeetingRequest';
 import { MeetingResponse } from 'src/app/shared/models/MeetingResponse';
 import { MeetingItemHistory } from 'src/app/shared/models/MeetingItemHistory';
+import { Status } from 'src/app/shared/models/Status';
+import { UpdateMeetingRequest } from 'src/app/shared/models/UpdateMeetingRequest';
 
 
 @Component({
@@ -21,61 +23,73 @@ export class CreateComponent implements OnInit {
     meetingItems: []
   }
 
-  MeetingResponse: MeetingResponse = {
-    name: '',
-    meetingType: '',
-    meetingItems: []
+  updateMeetingRequest: UpdateMeetingRequest = {
+    meetingItemId: 0,
+    statusId: 0
   }
 
+  meetingType: MeetingType = {
+    id: 0,
+    name: ''
+  }
+
+  meetingResponse: MeetingResponse = {
+    id: 0,
+    meetingTypeId: 0,
+    meetingType: this.meetingType,
+    meetingItems: [],
+    createdOn: '',
+    name: ''
+  }
+
+  statuses: Status[] = [];
   meetingTypes: MeetingType[] = [];
-  meetingItems: MeetingItem[] = [];
   meetingItemHistory: MeetingItemHistory[] = []
+  header: string = '';
   meetingTypeId: number = 0;
- 
-  meetingType: string = '';
-  meeting: string = '';
-  meetingDate: string = '';
+  newMeetingCreated: boolean = false
+  meetingItemStatusUpdated = false
 
-
-  displayedColumns: string[] = ['select', 'Meeting Item', 'Comment', 'Status', 'Action By'];
   selection = new SelectionModel<MeetingItem>(true, []);
 
 
-  constructor(private meetingService: MeetingServiceService) { }
-  
+  constructor(private meetingService: MeetingServiceService, ) { }
 
   ngOnInit(): void {
     this.getMeetingType();
+    this.getStatus();
   }
 
   getMeetingType(){
     this.meetingService.getTypes().subscribe({
-      next: response => this.meetingTypes = [{id: 0, name: 'All'}, ...response],
+      next: response => this.meetingTypes = response,
       error: error => console.log(error)
     })
   }
 
-  getMeetingItems(){
-    this.meetingService.getMeetingItems(this.meetingTypeId).subscribe({
-      next: response => this.meetingItems = response,
+  getStatus(){
+    this.meetingService.getStatuses().subscribe({
+      next: response => this.statuses = response,
+      error: error => console.log(error)
+    })
+  }
+
+  getMeeting(){
+    this.meetingService.getMeeting(this.meetingTypeId).subscribe({
+      next: response => this.meetingResponse = response,
       error: error => console.log(error)
     })
   }
 
   getSeletedValue(event: any){
     this.meetingTypeId = event.source.value;
-    this.getMeetingItems();
-
-    this.meetingType = this.meetingItems[0].meeting.meetingType.name;
-    this.meeting = this.meetingItems[0].meeting.name;
-    this.meetingDate = this.meetingItems[0].meeting.createdOn
-
+    this.getMeeting();
   }
 
   /** Whether the number of selected elements matches the total number of rows. */
   isAllSelected() {
     const numSelected = this.selection.selected.length;
-    const numRows = this.meetingItems.length;
+    const numRows = this.meetingResponse.meetingItems.length;
     return numSelected === numRows;
   }
 
@@ -86,26 +100,58 @@ export class CreateComponent implements OnInit {
       return;
     }
 
-    this.selection.select(...this.meetingItems);
+    this.selection.select(...this.meetingResponse.meetingItems);
+  }
+
+  onStatusSelected(event: any) {
+    this.updateMeetingRequest.meetingItemId = this.meetingTypeId;
+    this.updateMeetingRequest.statusId = event.target.value
+
+    this.meetingService.updateMeetingStatus(this.updateMeetingRequest).subscribe({
+      next: response => this.meetingItemStatusUpdated = response,
+      error: error => console.log(error)
+    })
+
   }
 
   captureNewMeeting() {
 
     let carryOverItems: MeetingItem[] = [];
+    let meetingItem: MeetingItem = {
+      id: 0,
+      description: '',
+      meetingType: '',
+      status: {
+        id: 0,
+        name: ''
+      },
+      statusId: 0,
+      actionItems: [],
+      meetingItemHistory: []
+    }
 
-    this.createMeetingRequest.name = this.meetingItems[0].meeting.meetingType.name.charAt(0) + (this.meetingItems[0].meeting.id += 1);
-    this.createMeetingRequest.meetingTypeId = this.meetingTypeId;
+    this.createMeetingRequest.name = this.meetingResponse.meetingType.name.charAt(0) + (this.meetingResponse.id += 1);
+    this.createMeetingRequest.meetingTypeId = this.meetingResponse.meetingType.id;
 
     for (let item of this.selection.selected) {
-      carryOverItems.push(item);
+      meetingItem.id = item.id
+      meetingItem.description = item.description
+      meetingItem.meetingType = item.meetingType
+      meetingItem.statusId = item.statusId
+      meetingItem.actionItems = item.actionItems
+      meetingItem.meetingItemHistory = item.meetingItemHistory
+
+      carryOverItems.push(meetingItem);
     }
 
     this.createMeetingRequest.meetingItems = carryOverItems;
     
     this.meetingService.createNewMeeing(this.createMeetingRequest).subscribe({
-      next: response => this.MeetingResponse = response,
+      next: response => this.meetingResponse = response,
       error: error => console.log(error)
     })
+
+    this.newMeetingCreated = true
 
   }
 }

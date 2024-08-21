@@ -45,7 +45,6 @@ export class CreateComponent implements OnInit {
   statuses: Status[] = [];
   meetingTypes: MeetingType[] = [];
   meetingItemHistory: MeetingItemHistory[] = []
-  header: string = '';
   meetingTypeId: number = 0;
   newMeetingCreated: boolean = false
   meetingItemStatusUpdated = false
@@ -103,8 +102,8 @@ export class CreateComponent implements OnInit {
     this.selection.select(...this.meetingResponse.meetingItems);
   }
 
-  onStatusSelected(event: any) {
-    this.updateMeetingRequest.meetingItemId = this.meetingTypeId;
+  onStatusSelected(event: any, meetingItemId: number) {
+    this.updateMeetingRequest.meetingItemId = meetingItemId;
     this.updateMeetingRequest.statusId = event.target.value
 
     this.meetingService.updateMeetingStatus(this.updateMeetingRequest).subscribe({
@@ -117,31 +116,12 @@ export class CreateComponent implements OnInit {
   captureNewMeeting() {
 
     let carryOverItems: MeetingItem[] = [];
-    let meetingItem: MeetingItem = {
-      id: 0,
-      description: '',
-      meetingType: '',
-      status: {
-        id: 0,
-        name: ''
-      },
-      statusId: 0,
-      actionItems: [],
-      meetingItemHistory: []
-    }
-
+    
     this.createMeetingRequest.name = this.meetingResponse.meetingType.name.charAt(0) + (this.meetingResponse.id += 1);
     this.createMeetingRequest.meetingTypeId = this.meetingResponse.meetingType.id;
 
     for (let item of this.selection.selected) {
-      meetingItem.id = item.id
-      meetingItem.description = item.description
-      meetingItem.meetingType = item.meetingType
-      meetingItem.statusId = item.statusId
-      meetingItem.actionItems = item.actionItems
-      meetingItem.meetingItemHistory = item.meetingItemHistory
-
-      carryOverItems.push(meetingItem);
+      carryOverItems.push(item);
     }
 
     this.createMeetingRequest.meetingItems = carryOverItems;
